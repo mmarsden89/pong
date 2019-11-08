@@ -26,14 +26,18 @@ import * as serviceWorker from './serviceWorker';
   var scorePlayer = 0
   var scorePc = 0
 
+  let maxVel = 200
   var velocityX = 100
   var velocityY = Phaser.Math.Between(-100, 100)
+
+
 
   function preloadGame () {
     //function where images are loaded
     this.load.image('player','assets/player.png');
     this.load.image('pc','assets/pc.png');
     this.load.image('ball','assets/ball.png');
+    this.load.spritesheet('dude', 'assets/playersprite.png', { frameWidth: 64, frameHeight: 64 });
   }
 
   function createGame () {
@@ -43,7 +47,8 @@ import * as serviceWorker from './serviceWorker';
       {up:Phaser.Input.Keyboard.KeyCodes.W,
       down:Phaser.Input.Keyboard.KeyCodes.S,
       left:Phaser.Input.Keyboard.KeyCodes.A,
-      right:Phaser.Input.Keyboard.KeyCodes.D});
+      right:Phaser.Input.Keyboard.KeyCodes.D,
+      shift: Phaser.Input.Keyboard.KeyCodes.SHIFT});
 
     cursor2 = this.input.keyboard.addKeys(
       {up:Phaser.Input.Keyboard.KeyCodes.UP,
@@ -51,8 +56,31 @@ import * as serviceWorker from './serviceWorker';
       left:Phaser.Input.Keyboard.KeyCodes.LEFT,
       right:Phaser.Input.Keyboard.KeyCodes.RIGHT});
 
-    player = this.physics.add.sprite(400, 600, 'player');
-    player.angle += 90
+    this.anims.create({
+      key: 'left',
+      frames: this.anims.generateFrameNumbers('dude', { start: 117, end: 125 }),
+      frameRate: 10
+    });
+
+    this.anims.create({
+      key: 'right',
+      frames: this.anims.generateFrameNumbers('dude', { start: 143, end: 151 }),
+      frameRate: 10,
+    });
+
+    this.anims.create({
+      key: 'up',
+      frames: this.anims.generateFrameNumbers('dude', { start: 105, end: 111 }),
+      frameRate: 10,
+    });
+
+    this.anims.create({
+      key: 'down',
+      frames: this.anims.generateFrameNumbers('dude', { start: 131, end: 138 }),
+      frameRate: 10,
+    });
+
+    player = this.physics.add.sprite(100, 450, 'dude');
     player.setCollideWorldBounds(true);
 
     pc = this.physics.add.sprite(400, 0, 'pc');
@@ -77,35 +105,116 @@ import * as serviceWorker from './serviceWorker';
 
   function updateGame () {
   //repeated events at certain time intervals
-    if(cursor.left.isDown) {
-      player.setVelocityX(-150);
+  // console.log(maxVel)
+
+    if (cursor.shift.isDown) {
+      maxVel = 325
+    } else {
+      maxVel = 200
     }
-    else if(cursor.right.isDown) {
-      player.setVelocityX(150);
+    if (cursor.left.isDown) {
+      player.setVelocityX(player.body.velocity.x > -maxVel ? player.body.velocity.x - 10 : -maxVel);
+      player.setVelocityY(0);
+      player.anims.play('left', true);
+    }
+    else if (cursor.right.isDown) {
+      player.setVelocityX(player.body.velocity.x < maxVel ? player.body.velocity.x + 10 : maxVel);
+      player.setVelocityY(0);
+      player.anims.play('right', true);
+    }
+    else if (cursor.up.isDown) {
+      player.setVelocityY(player.body.velocity.y > -maxVel ? player.body.velocity.y - 10 : -maxVel);
+      player.setVelocityX(0);
+      player.anims.play('up', true);
+    }
+    else if (cursor.down.isDown) {
+      player.setVelocityY(player.body.velocity.y < maxVel ? player.body.velocity.y + 10 : maxVel);
+      player.setVelocityX(0);
+      player.anims.play('down', true);
     }
     else {
-      player.setVelocityX(0);
+      if (player.body.velocity.x > 0) {
+      player.setVelocityX(player.body.velocity.x - 2);
+      player.anims.stop(null, true);
+    } else if (player.body.velocity.x < 0) {
+      player.setVelocityX(player.body.velocity.x + 2);
+      player.anims.stop(null, true);
+    } else {
+      player.setVelocityX(0)
+      player.anims.stop(null, true);
+    }
+      if (player.body.velocity.y > 0) {
+      player.setVelocityY(player.body.velocity.y - 2);
+      player.anims.stop(null, true);
+    } else if (player.body.velocity.y < 0) {
+      player.setVelocityY(player.body.velocity.y + 2);
+      player.anims.stop(null, true);
+    } else {
+      player.setVelocityY(0)
+      player.anims.stop(null, true);
+    }
+      if (player.body.velocity.y > 0 && player.body.velocity.x > 0) {
+      player.setVelocityY(player.body.velocity.y - 2);
+      player.setVelocityX(player.body.velocity.x - 2);
+      player.anims.stop(null, true);
+    } else if (player.body.velocity.y < 0 && player.body.velocity.x > 0) {
+      player.setVelocityY(player.body.velocity.y + 2);
+      player.setVelocityX(player.body.velocity.x - 2);
+      player.anims.stop(null, true);
+    }
+      else if (player.body.velocity.y < 0 && player.body.velocity.x < 0) {
+      player.setVelocityY(player.body.velocity.y + 2);
+      player.setVelocityX(player.body.velocity.x + 2);
+      player.anims.stop(null, true);
+    }
+      else if (player.body.velocity.y > 0 && player.body.velocity.x < 0) {
+      player.setVelocityY(player.body.velocity.y - 2);
+      player.setVelocityX(player.body.velocity.x + 2);
+      player.anims.stop(null, true);
+    }
+  }
+
+    if (cursor.left.isDown && cursor.up.isDown) {
+      player.setVelocityY(-maxVel);
+      player.setVelocityX(-maxVel);
+      player.anims.play('left', true);
+    }
+    else if (cursor.left.isDown && cursor.down.isDown) {
+      player.setVelocityY(maxVel);
+      player.setVelocityX(-maxVel);
+      player.anims.play('left', true);
+    }
+    else if (cursor.right.isDown && cursor.up.isDown) {
+      player.setVelocityY(-maxVel);
+      player.setVelocityX(maxVel);
+      player.anims.play('right', true);
+    }
+    else if (cursor.right.isDown && cursor.down.isDown) {
+      player.setVelocityY(maxVel);
+      player.setVelocityX(maxVel);
+      player.anims.play('right', true);
     }
 
-    if(cursor2.left.isDown) {
-     pc.setVelocityX(-150);
+    if (cursor2.left.isDown) {
+      pc.setVelocityX(-maxVel);
     }
-    else if(cursor2.right.isDown) {
-     pc.setVelocityX(150);
+    else if (cursor2.right.isDown) {
+      pc.setVelocityX(maxVel);
     }
-   else {
-     pc.setVelocityX(0);
+    else {
+      pc.setVelocityX(0);
     }
+
     if (Math.round(ball.y) >= 590) {
       scorePc += 1;
       scoreTextPc.setText('Score: ' + scorePc);
-      reset();
+      // reset();
     }
 
     if (Math.round(ball.y) <= 5) {
       scorePlayer += 1;
       scoreTextPlayer.setText('Score: ' + scorePlayer);
-      reset();
+      // reset();
     }
   }
 
@@ -113,13 +222,13 @@ import * as serviceWorker from './serviceWorker';
     velocityY = velocityY + 50;
     velocityY = velocityY * -1;
 
-    ball.setVelocityX(velocityY);
+    ball.setVelocityY(velocityY);
 
     if (velocityX < 0) {
       velocityX = velocityX * -1
       ball.setVelocityX(velocityX);
     }
-    player.setVelocityY(-1);
+    player.setVelocityY(10);
   }
 
   function hitPc (ball, pc) {
