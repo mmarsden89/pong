@@ -85,13 +85,13 @@ import * as serviceWorker from './serviceWorker';
 
     this.anims.create({
       key: 'spacebar',
-      frames: this.anims.generateFrameNumbers('dude', { start: 156, end: 161 }),
+      frames: this.anims.generateFrameNumbers('dude', { start: 161, end: 156 }),
       frameRate: 12
     });
 
     this.anims.create({
       key: 'spacebar2',
-      frames: this.anims.generateFrameNumbers('racket', { start: 0, end: 5}),
+      frames: this.anims.generateFrameNumbers('racket', { start: 5, end: 0}),
       frameRate: 12,
     })
 
