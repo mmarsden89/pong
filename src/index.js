@@ -27,6 +27,7 @@ import * as serviceWorker from './serviceWorker';
   var scorePc = 0
 
   let maxVel = 200
+  let maxBallVel = 300
   var velocityX = 100
   var velocityY = Phaser.Math.Between(-100, 100)
   let setHit = 1
@@ -96,6 +97,7 @@ import * as serviceWorker from './serviceWorker';
     player = this.physics.add.sprite(100, 450, 'dude');
     racket = this.physics.add.sprite(100, 450, 'racket')
     player.setCollideWorldBounds(true);
+    player.setBounce(0)
 
     pc = this.physics.add.sprite(400, 0, 'pc');
     pc.angle += 90
@@ -117,13 +119,12 @@ import * as serviceWorker from './serviceWorker';
   }
 
   function updateGame () {
-    // console.log(setHit)
   //repeated events at certain time intervals
-    velocityY < 0 ? velocityY++ : velocityY--
-    console.log(ball.body)
+  // console.log(Math.round(ball.body.velocity.y))
 
     racket.body.x = player.body.x
     racket.body.y = player.body.y
+
     if (cursor.shift.isDown) {
       maxVel = 325
     } else {
@@ -155,7 +156,6 @@ import * as serviceWorker from './serviceWorker';
     }
     else if (cursor.spacebar.isDown) {
       setHit < 5 ? setHit++ : setHit = 1
-      console.log(setHit)
       player.anims.play('spacebar', true)
       racket.anims.play('spacebar2', true)
     }
@@ -257,16 +257,21 @@ import * as serviceWorker from './serviceWorker';
   }
 
   function hitPlayer (ball, player) {
-    velocityY = velocityY + 50;
-    velocityY = velocityY * -setHit
+    if (cursor.spacebar.isDown) {
+      velocityY < maxBallVel ? velocityY = velocityY + 50 : velocityY = 100
+      velocityY = velocityY * -setHit
 
-    ball.setVelocityY(velocityY);
+      ball.setVelocityY(velocityY);
 
     if (velocityX < 0) {
       velocityX = velocityX * player.body.velocityX
       ball.setVelocityX(velocityX);
     }
-    player.setVelocityY(10);
+    player.setVelocityY(0);
+  } else {
+    ball.setVelocityY(-5)
+    ball.setVelocityX(0);
+  }
   }
 
   function hitPc (ball, pc) {
