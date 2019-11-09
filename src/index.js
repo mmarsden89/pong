@@ -148,10 +148,16 @@ import * as serviceWorker from './serviceWorker';
       racket.setFrame(0)
     }
     else if (cursor.up.isDown) {
+      console.log(player.body.y)
+      if (player.body.y > 275) {
       player.setVelocityY(player.body.velocity.y > -maxVel ? player.body.velocity.y - 10 : -maxVel);
       player.setVelocityX(0);
       player.anims.play('up', true);
       racket.setFrame(0)
+    } else {
+      player.anims.play('up', true);
+      player.setVelocityY(0)
+    }
     }
     else if (cursor.down.isDown) {
       player.setVelocityY(player.body.velocity.y < maxVel ? player.body.velocity.y + 10 : maxVel);
