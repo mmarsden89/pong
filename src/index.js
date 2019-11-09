@@ -148,8 +148,7 @@ import * as serviceWorker from './serviceWorker';
       racket.setFrame(0)
     }
     else if (cursor.up.isDown) {
-      console.log(player.body.y)
-      if (player.body.y > 275) {
+      if (player.body.y > 280) {
       player.setVelocityY(player.body.velocity.y > -maxVel ? player.body.velocity.y - 10 : -maxVel);
       player.setVelocityX(0);
       player.anims.play('up', true);
@@ -226,9 +225,11 @@ import * as serviceWorker from './serviceWorker';
   }
 
     if (cursor.left.isDown && cursor.up.isDown) {
-      player.setVelocityY(-maxVel);
-      player.setVelocityX(-maxVel);
-      player.anims.play('left', true);
+      if (player.body.y > 280) {
+        player.setVelocityY(-maxVel);
+        player.setVelocityX(-maxVel);
+        player.anims.play('left', true);
+      }
     }
     else if (cursor.left.isDown && cursor.down.isDown) {
       player.setVelocityY(maxVel);
@@ -236,9 +237,11 @@ import * as serviceWorker from './serviceWorker';
       player.anims.play('left', true);
     }
     else if (cursor.right.isDown && cursor.up.isDown) {
-      player.setVelocityY(-maxVel);
-      player.setVelocityX(maxVel);
-      player.anims.play('right', true);
+      if (player.body.y > 280) {
+        player.setVelocityY(-maxVel);
+        player.setVelocityX(maxVel);
+        player.anims.play('right', true);
+      }
     }
     else if (cursor.right.isDown && cursor.down.isDown) {
       player.setVelocityY(maxVel);
