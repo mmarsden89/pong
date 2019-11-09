@@ -27,9 +27,9 @@ import * as serviceWorker from './serviceWorker';
   var scorePc = 0
 
   let maxVel = 200
-  let maxBallVel = 300
-  var velocityX = 100
-  var velocityY = Phaser.Math.Between(-100, 100)
+  let maxBallVel = 600
+  var velocityX = 0
+  var velocityY = 0
   let setHit = 1
 
   function preloadGame () {
@@ -95,7 +95,7 @@ import * as serviceWorker from './serviceWorker';
       frameRate: 12,
     })
 
-    ball = this.physics.add.sprite(400, 200, 'ball');
+    ball = this.physics.add.sprite(400, 400, 'ball');
 
 
     ball.setCollideWorldBounds(true);
@@ -104,20 +104,18 @@ import * as serviceWorker from './serviceWorker';
     ball.setVelocityY(velocityY);
     ball.setVelocityX(velocityX);
 
-    player = this.physics.add.sprite(100, 450, 'dude');
-    player.setSize(30, 35, 2.5, 15)
-    racket = this.physics.add.sprite(100, 450, 'racket')
-    racket.setSize(30, 35, 2.5, 15)
+    player = this.physics.add.sprite(350, 500, 'dude');
+    player.setSize(30, 35, 30, 15)
+    racket = this.physics.add.sprite(350, 480, 'racket')
+    racket.setSize(30, 74, 15, 0)
     player.setCollideWorldBounds(true);
     player.setBounce(0)
 
-    pc = this.physics.add.sprite(400, 0, 'pc');
-    pc.angle += 90
-    pc.setCollideWorldBounds(true);
 
 
     this.physics.add.collider(ball, player, hitPlayer, null, this);
-    this.physics.add.collider(ball, pc, hitPc, null, this);
+    this.physics.add.collider(ball, racket, hitBall, null, this);
+    // this.physics.add.collider(ball, pc, hitPc, null, this);
 
     scoreTextPc = this.add.text(16, 16, 'score: 0', { fontSize: '16px', fill: '#F00' });
     scoreTextPlayer = this.add.text(700, 16, 'score: 0', { fontSize: '16px', fill: '#00F' });
@@ -125,16 +123,25 @@ import * as serviceWorker from './serviceWorker';
 
   function updateGame () {
   //repeated events at certain time intervals
-  // console.log(Math.round(ball.body.velocity.y))
+    // console.log(ball.body.velocity.y)
 
     racket.body.x = player.body.x
-    racket.body.y = player.body.y
+    racket.body.y = player.body.y - 20
 
     if (cursor.shift.isDown) {
       maxVel = 325
     } else {
       maxVel = 200
     }
+
+    if (ball.body.velocity.y < 0) {
+      let currentVeloc = ball.body.velocity.y
+      ball.setVelocityY(currentVeloc + .1)
+    } else if (ball.body.velocity.y) {
+      let currentVeloc = ball.body.velocity.y
+      ball.setVelocity(currentVeloc - .1)
+    }
+
     if (cursor.left.isDown) {
       player.setVelocityX(player.body.velocity.x > -maxVel ? player.body.velocity.x - 10 : -maxVel);
       player.setVelocityY(0);
@@ -222,6 +229,13 @@ import * as serviceWorker from './serviceWorker';
       player.setVelocityX(player.body.velocity.x + 2);
       player.anims.stop(null, true);
     }
+    else {
+      player.setVelocityY(0)
+      player.anims.stop(null, true);
+      racket.anims.stop(null, true);
+      racket.setFrame(0)
+      player.setFrame(104)
+    }
   }
 
     if (cursor.left.isDown && cursor.up.isDown) {
@@ -249,15 +263,15 @@ import * as serviceWorker from './serviceWorker';
       player.anims.play('right', true);
     }
 
-    if (cursor2.left.isDown) {
-      pc.setVelocityX(-maxVel);
-    }
-    else if (cursor2.right.isDown) {
-      pc.setVelocityX(maxVel);
-    }
-    else {
-      pc.setVelocityX(0);
-    }
+    // if (cursor2.left.isDown) {
+    //   pc.setVelocityX(-maxVel);
+    // }
+    // else if (cursor2.right.isDown) {
+    //   pc.setVelocityX(maxVel);
+    // }
+    // else {
+    //   pc.setVelocityX(0);
+    // }
 
     if (Math.round(ball.y) >= 596) {
       scorePc += 1;
@@ -272,36 +286,45 @@ import * as serviceWorker from './serviceWorker';
     }
   }
 
-  function hitPlayer (ball, player) {
+  function hitBall (ball, racket) {
     if (cursor.spacebar.isDown) {
-      velocityY < maxBallVel ? velocityY = velocityY + 50 : velocityY = 100
-      velocityY = velocityY * -setHit
+      velocityY = 100 * -setHit
 
-      ball.setVelocityY(velocityY);
+      if (velocityY < maxBallVel && velocityY > 0) {
+        ball.setVelocityY(-velocityY)
+      } else if (velocityY > -maxBallVel && velocityY < 0) {
+        ball.setVelocityY(velocityY)
+      }
 
-    if (velocityX < 0) {
-      velocityX = velocityX * player.body.velocityX
-      ball.setVelocityX(velocityX);
-    }
-    player.setVelocityY(0);
-  } else {
-    ball.setVelocityY(-5)
+      if (velocityX < 0) {
+        // velocityX = velocityX * racket.body.velocityX
+        ball.setVelocityX(velocityX);
+      }
+      racket.setVelocityY(0);
+  }
+}
+
+  function hitPlayer (ball, player) {
+    ball.setVelocityY(0)
     ball.setVelocityX(0);
-  }
-  }
-
-  function hitPc (ball, pc) {
-    velocityY = velocityY - 50;
-    velocityY = velocityY * -1;
-    ball.setVelocityY(velocityY);
-
-    if(velocityX < 0) {
-      velocityX = velocityX * -1
-      ball.setVelocityX(velocityX);
-    }
-    pc.setVelocityY(1);
+    racket.setVelocityY(0)
+    racket.setVelocityX(0)
+    player.setVelocityY(0)
+    player.setVelocityX(0)
   }
 
+  // function hitPc (ball, pc) {
+  //   velocityY = velocityY - 50;
+  //   velocityY = velocityY * -1;
+  //   ball.setVelocityY(velocityY);
+  //
+  //   if(velocityX < 0) {
+  //     velocityX = velocityX * -1
+  //     ball.setVelocityX(velocityX);
+  //   }
+  //   pc.setVelocityY(1);
+  // }
+  //
   function flipChar () {
     if (player.flipX === false) {
       racket.flipX = true
