@@ -50,7 +50,8 @@ import * as serviceWorker from './serviceWorker';
       left:Phaser.Input.Keyboard.KeyCodes.A,
       right:Phaser.Input.Keyboard.KeyCodes.D,
       shift: Phaser.Input.Keyboard.KeyCodes.SHIFT,
-      spacebar: Phaser.Input.Keyboard.KeyCodes.SPACE});
+      spacebar: Phaser.Input.Keyboard.KeyCodes.SPACE,
+      one: Phaser.Input.Keyboard.KeyCodes.ONE});
 
     cursor2 = this.input.keyboard.addKeys(
       {up:Phaser.Input.Keyboard.KeyCodes.UP,
@@ -94,8 +95,19 @@ import * as serviceWorker from './serviceWorker';
       frameRate: 12,
     })
 
+    ball = this.physics.add.sprite(400, 200, 'ball');
+
+
+    ball.setCollideWorldBounds(true);
+    ball.setBounce(1);
+
+    ball.setVelocityY(velocityY);
+    ball.setVelocityX(velocityX);
+
     player = this.physics.add.sprite(100, 450, 'dude');
+    player.setSize(30, 35, 2.5, 15)
     racket = this.physics.add.sprite(100, 450, 'racket')
+    racket.setSize(30, 35, 2.5, 15)
     player.setCollideWorldBounds(true);
     player.setBounce(0)
 
@@ -103,13 +115,6 @@ import * as serviceWorker from './serviceWorker';
     pc.angle += 90
     pc.setCollideWorldBounds(true);
 
-    ball = this.physics.add.sprite(400, 200, 'ball');
-
-    ball.setCollideWorldBounds(true);
-    ball.setBounce(1);
-
-    ball.setVelocityY(velocityY);
-    ball.setVelocityX(velocityX);
 
     this.physics.add.collider(ball, player, hitPlayer, null, this);
     this.physics.add.collider(ball, pc, hitPc, null, this);
@@ -158,6 +163,8 @@ import * as serviceWorker from './serviceWorker';
       setHit < 5 ? setHit++ : setHit = 1
       player.anims.play('spacebar', true)
       racket.anims.play('spacebar2', true)
+    } else if (cursor.one.isDown) {
+      flipChar()
     }
     else {
       setHit = 1
@@ -284,6 +291,16 @@ import * as serviceWorker from './serviceWorker';
       ball.setVelocityX(velocityX);
     }
     pc.setVelocityY(1);
+  }
+
+  function flipChar () {
+    if (player.flipX === false) {
+      racket.flipX = true
+      player.flipX = true
+    } else {
+      racket.flipX = false
+      player.flipX = false
+    }
   }
 
   function reset () {
