@@ -30,8 +30,7 @@ import * as serviceWorker from './serviceWorker';
   let maxBallVel = 600
   var velocityX = 0
   var velocityY = 0
-  let setHitY = 1
-  let setHitX = 0
+  let setHitY = .1
 
   function preloadGame () {
     //function where images are loaded
@@ -97,13 +96,14 @@ import * as serviceWorker from './serviceWorker';
     ball.setCollideWorldBounds(true, 0, 0)
     ball.setVelocityY(velocityY);
     ball.setVelocityX(velocityX);
+    ball.setBounce(0)
 
     wall = this.physics.add.sprite(400, 20, 'wall')
 
     player = this.physics.add.sprite(350, 500, 'dude');
     player.setSize(30, 35, 30, 15)
     racket = this.physics.add.sprite(335, 485, 'racket')
-    racket.setSize(64, 74, 0, 0)
+    racket.setSize(80, 74, 0, 0)
     player.setCollideWorldBounds(true);
     player.setBounce(.5)
 
@@ -117,7 +117,7 @@ import * as serviceWorker from './serviceWorker';
 
   function updateGame () {
     //repeated events at certain time intervals
-    rect.width = 10 * setHitY
+    setHitY < 1 ? rect.width = 0 : rect.width = 10 * (setHitY / 10)
     rect.x = player.body.x + 12
     rect.y = player.body.y + 64
 
@@ -132,10 +132,10 @@ import * as serviceWorker from './serviceWorker';
 
     if (ball.body.velocity.y < 0) {
       let currentVeloc = ball.body.velocity.y
-      ball.setVelocityY(currentVeloc + .2)
+      ball.setVelocityY(currentVeloc + .1)
     } else if (ball.body.velocity.y > 0) {
       let currentVeloc = ball.body.velocity.y
-      ball.setVelocityY(currentVeloc - .2)
+      ball.setVelocityY(currentVeloc - .1)
     }
 
     if (ball.body.velocity.y === 0) {
@@ -194,18 +194,16 @@ import * as serviceWorker from './serviceWorker';
     else if (cursor.spacebar.isDown) {
       player.setFrame(161)
       racket.setFrame(5)
-      if (setHitY < 5) {
+      if (setHitY < 60) {
         setHitY++
       }
-      setHitX < 5 ? setHitX++ : setHitX = 0
     }
     else if (Phaser.Input.Keyboard.JustUp(cursor.spacebar)) {
       player.anims.play('spacebar', true)
       racket.anims.play('spacebar2', true)
     }
     else {
-      setHitY = 1
-      setHitX = 0
+      setHitY = .1
       if (player.body.velocity.x > 0) {
       player.setVelocityX(player.body.velocity.x - 2);
     } else if (player.body.velocity.x < 0) {
@@ -285,25 +283,27 @@ import * as serviceWorker from './serviceWorker';
 
   function hitBall (ball, racket) {
     if (Phaser.Input.Keyboard.JustUp(cursor.spacebar)) {
+      // console.log(Math.round(ball.body.x), Math.round(player.body.x))
       player.anims.play('spacebar', true)
       racket.anims.play('spacebar2', true)
-      velocityY = 100 * -setHitY
+      velocityY = 100 * (-setHitY / 10)
 
-      if (velocityY < maxBallVel && velocityY > 0) {
-        ball.setVelocityY(-velocityY)
-      } else if (velocityY > -maxBallVel && velocityY < 0) {
-        ball.setVelocityY(velocityY)
-      }
+      ball.setVelocityY(velocityY)
 
-        velocityX = 5 * setHitX
+      console.log(velocityX, -velocityX)
+      if (ball.body.x < player.body.x) {
+        velocityX = 5 * (ball.body.x - player.body.x)
         ball.setVelocityX(velocityX);
+      } else {
+        velocityX = 5 * (player.body.x - ball.body.x)
+        ball.setVelocityX(-velocityX);
       }
     }
+  }
 
   function hitPlayer (ball, player) {
     ball.setVelocityY(0)
     ball.setVelocityX(0);
-
   }
 
   function hitWall (ball, wall) {
