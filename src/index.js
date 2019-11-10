@@ -22,7 +22,7 @@ import * as serviceWorker from './serviceWorker';
 
   var game = new Phaser.Game(config);
 
-  var pc, player, racket, cursor, ball, wall, scoreTextPlayer, scoreTextPc, rect, court
+  var pc, player, racket, cursor, ball, wall, scoreTextPlayer, scoreTextPc, rect, circle, court, divider
   var scorePlayer = 0
   var scorePc = 0
 
@@ -42,6 +42,7 @@ import * as serviceWorker from './serviceWorker';
     this.load.image('pc','assets/pc.png')
     this.load.image('ball','assets/ball.png')
     this.load.image('wall','assets/wall.png')
+    this.load.image('divider','assets/divider.png')
     this.load.image('court','assets/tempcourt.png')
     this.load.spritesheet('dude', 'assets/playersprite.png', { frameWidth: 64, frameHeight: 64 })
     this.load.spritesheet('racket', 'assets/racket.png', { frameWidth: 64, frameHeight: 64 })
@@ -49,10 +50,11 @@ import * as serviceWorker from './serviceWorker';
 
   function createGame () {
   //function in which objects are created
-    rect = this.add.rectangle(300, 400, 50, 5,  0xff0000)
     court = this.add.image(400, 300, 'court');
     court.displayWidth = 800
     court.displayHeight = 600
+    // divider = this.add.image(405,280, 'divider')
+    rect = this.add.rectangle(300, 400, 50, 5,  0xff0000)
 
     cursor = this.input.keyboard.addKeys(
       {up:Phaser.Input.Keyboard.KeyCodes.W,
@@ -61,7 +63,8 @@ import * as serviceWorker from './serviceWorker';
       right:Phaser.Input.Keyboard.KeyCodes.D,
       shift: Phaser.Input.Keyboard.KeyCodes.SHIFT,
       spacebar: Phaser.Input.Keyboard.KeyCodes.SPACE,
-      one: Phaser.Input.Keyboard.KeyCodes.ONE});
+      one: Phaser.Input.Keyboard.KeyCodes.ONE,
+      reset: Phaser.Input.Keyboard.KeyCodes.R});
 
     this.anims.create({
       key: 'left',
@@ -99,6 +102,11 @@ import * as serviceWorker from './serviceWorker';
       frameRate: 16
     })
 
+    divider = this.physics.add.sprite(405, 285, 'divider')
+    divider.setImmovable(true)
+
+    circle = this.add.circle(300, 400, 12, 0x396022)
+
     ball = this.physics.add.sprite(400, 400, 'ball')
 
     ball.setCollideWorldBounds(true, 0, 0)
@@ -108,9 +116,9 @@ import * as serviceWorker from './serviceWorker';
     ball.setBounce(0)
 
     wall = this.physics.add.sprite(400, 20, 'wall')
-
     player = this.physics.add.sprite(350, 500, 'dude');
     player.setSize(30, 35, 30, 15)
+    player.setImmovable(true)
     racket = this.physics.add.sprite(335, 485, 'racket')
     racket.setSize(80, 74, 0, 0)
     player.setCollideWorldBounds(true);
@@ -119,6 +127,7 @@ import * as serviceWorker from './serviceWorker';
     this.physics.add.collider(ball, player, hitPlayer, null, this)
     this.physics.add.collider(ball, racket, hitBall, null, this)
     this.physics.add.collider(ball, wall, hitWall, null, this)
+    this.physics.add.collider(divider, player, hitDivider, null, this)
 
     scoreTextPc = this.add.text(16, 16, 'score: 0', { fontSize: '16px', fill: '#F00' });
     scoreTextPlayer = this.add.text(700, 16, 'score: 0', { fontSize: '16px', fill: '#00F' });
@@ -126,9 +135,12 @@ import * as serviceWorker from './serviceWorker';
 
   function updateGame () {
     //repeated events at certain time intervals
+    // console.log(circle)
     setHitY < 1 ? rect.width = 0 : rect.width = 10 * (setHitY / 10)
     rect.x = player.body.x + 12
     rect.y = player.body.y + 64
+    circle.x = player.body.x + 14.5
+    circle.y = player.body.y + 45
 
     racket.body.x = player.body.x - 15
     racket.body.y = player.body.y - 15
@@ -188,16 +200,10 @@ import * as serviceWorker from './serviceWorker';
       player.setFrame(104)
     }
     else if (cursor.up.isDown) {
-      if (player.body.y > 280) {
       player.setVelocityY(player.body.velocity.y > -maxVel ? player.body.velocity.y - 10 : -maxVel);
       player.setVelocityX(0);
       player.anims.play('up', true);
       racket.setFrame(0)
-    }
-    else {
-      player.anims.play('up', true);
-      player.setVelocityY(0)
-      }
     }
     else if (Phaser.Input.Keyboard.JustUp(cursor.up)) {
       player.anims.stop(null, true);
@@ -215,6 +221,9 @@ import * as serviceWorker from './serviceWorker';
     }
     else if (cursor.one.isDown) {
       flipChar()
+    }
+    else if (cursor.reset.isDown) {
+      reset()
     }
     else if (cursor.spacebar.isDown) {
       player.setFrame(161)
@@ -340,6 +349,11 @@ import * as serviceWorker from './serviceWorker';
     wall.setVelocityY(0)
   }
 
+  function hitDivider (divider, player) {
+    player.setVelocityX(0)
+    player.setVelocityY(0)
+  }
+
   function flipChar () {
     if (player.flipX === false) {
       racket.flipX = true
@@ -351,16 +365,10 @@ import * as serviceWorker from './serviceWorker';
   }
 
   function reset () {
-    velocityX = 100
-    velocityY = Phaser.Math.Between(-100, 100)
     ball.x = 400;
-    ball.y = 200;
-    player.x = 400;
-    player.y = 600;
-    pc.x = 400;
-    pc.y = 0;
-    ball.setVelocityX(velocityX);
-    ball.setVelocityY(velocityY);
+    ball.y = 400;
+    ball.setVelocityX(0);
+    ball.setVelocityY(0);
   }
 
 ReactDOM.render(<App />, document.getElementById('root'));
