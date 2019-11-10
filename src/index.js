@@ -7,8 +7,8 @@ import * as serviceWorker from './serviceWorker';
 
   var config = {
       type: Phaser.AUTO,
-      width: 800,
-      height: 600,
+      width: 1208,
+      height: 680,
       backgroundColor: '#543d3d',
       physics: {
         default: 'arcade'
@@ -22,12 +22,11 @@ import * as serviceWorker from './serviceWorker';
 
   var game = new Phaser.Game(config);
 
-  var pc, player, racket, cursor, ball, wall, scoreTextPlayer, scoreTextPc, rect, circle, court, divider
+  var player, racket, cursor, ball, wall, scoreTextPlayer, scoreTextPc, rect, circle, court, divider
   var scorePlayer = 0
   var scorePc = 0
 
-  let maxVel = 200
-  let maxBallVel = 600
+  let maxVel = 150
   var velocityX = 0
   var velocityY = 0
   var ballZ = 1
@@ -43,7 +42,7 @@ import * as serviceWorker from './serviceWorker';
     this.load.image('pc','assets/pc.png')
     this.load.image('ball','assets/ball.png')
     this.load.image('wall','assets/wall.png')
-    this.load.image('divider','assets/divider.png')
+    // this.load.image('divider','assets/divider.png')
     this.load.image('court','assets/tempcourt.png')
     this.load.spritesheet('dude', 'assets/playersprite.png', { frameWidth: 64, frameHeight: 64 })
     this.load.spritesheet('racket', 'assets/racket.png', { frameWidth: 64, frameHeight: 64 })
@@ -51,10 +50,9 @@ import * as serviceWorker from './serviceWorker';
 
   function createGame () {
   //function in which objects are created
-    court = this.add.image(400, 300, 'court');
-    court.displayWidth = 800
-    court.displayHeight = 600
-    // divider = this.add.image(405,280, 'divider')
+    court = this.add.image(604, 340, 'court');
+    court.displayWidth = 1208
+    court.displayHeight = 680
     rect = this.add.rectangle(300, 400, 50, 5,  0xff0000)
 
     cursor = this.input.keyboard.addKeys(
@@ -103,10 +101,10 @@ import * as serviceWorker from './serviceWorker';
       frameRate: 16
     })
 
-    divider = this.physics.add.sprite(405, 285, 'divider')
-    divider.setImmovable(true)
+    // divider = this.physics.add.image(587, 320, 'divider')
+    // divider.setImmovable(true)
 
-    circle = this.add.circle(300, 400, 12, 0x396022)
+    circle = this.add.circle(300, 400, 12, 0x396022, .3)
 
     ball = this.physics.add.sprite(400, 400, 'ball')
 
@@ -116,7 +114,8 @@ import * as serviceWorker from './serviceWorker';
     ball.setScale(ballZ)
     ball.setBounce(0)
 
-    wall = this.physics.add.sprite(400, 20, 'wall')
+    wall = this.physics.add.image(600, 20, 'wall')
+    wall.setImmovable(true)
     player = this.physics.add.sprite(350, 500, 'dude');
     player.setSize(30, 35, 30, 15)
     player.setImmovable(true)
@@ -128,16 +127,14 @@ import * as serviceWorker from './serviceWorker';
     this.physics.add.collider(ball, player, hitPlayer, null, this)
     this.physics.add.collider(ball, racket, hitBall, null, this)
     this.physics.add.collider(ball, wall, hitWall, null, this)
-    this.physics.add.collider(divider, player, hitDivider, null, this)
-    this.physics.add.overlap(divider, ball, ballDivider, detectedTrue, this)
+    // this.physics.add.collider(divider, player, hitDivider, null, this)
+    // this.physics.add.overlap(divider, ball, ballDivider, detectedTrue, this)
 
     scoreTextPc = this.add.text(16, 16, 'score: 0', { fontSize: '16px', fill: '#F00' });
     scoreTextPlayer = this.add.text(700, 16, 'score: 0', { fontSize: '16px', fill: '#00F' });
   }
 
   function updateGame () {
-    //repeated events at certain time intervals
-    // console.log(circle)
     setHitY < 1 ? rect.width = 0 : rect.width = 10 * (setHitY / 10)
     rect.x = player.body.x + 12
     rect.y = player.body.y + 64
@@ -146,13 +143,6 @@ import * as serviceWorker from './serviceWorker';
 
     racket.body.x = player.body.x - 15
     racket.body.y = player.body.y - 15
-    // console.log(ball.body.scale)
-
-    // if (scale < 1.5 && ball.body.y < 300 && ball.body.velocity.y < 0) {
-    //   console.log(ball.body.y)
-    //   ball.setVelocityX(0)
-    //   ball.setVelocityY(0)
-    // }
 
     if (distance > 0 && distance < 50) {
       ball.setScale(scale + (setHitZ / 60))
@@ -169,9 +159,9 @@ import * as serviceWorker from './serviceWorker';
     }
 
     if (cursor.shift.isDown) {
-      maxVel = 325
+      maxVel = 250
     } else {
-      maxVel = 200
+      maxVel = 150
     }
 
     if (ball.body.velocity.y < 0) {
@@ -203,7 +193,8 @@ import * as serviceWorker from './serviceWorker';
       player.setVelocityY(0);
       player.anims.play('right', true);
       racket.setFrame(0)
-    } else if (Phaser.Input.Keyboard.JustUp(cursor.right)) {
+    }
+    else if (Phaser.Input.Keyboard.JustUp(cursor.right)) {
       player.anims.stop(null, true);
       player.setFrame(104)
     }
@@ -250,38 +241,39 @@ import * as serviceWorker from './serviceWorker';
     else {
       setHitY = .1
       setHitZ = 1
-      if (player.body.velocity.x > 0) {
-      player.setVelocityX(player.body.velocity.x - 2);
-    } else if (player.body.velocity.x < 0) {
-      player.setVelocityX(player.body.velocity.x + 2);
+    if (player.body.velocity.x > 0) {
+      player.setVelocityX(player.body.velocity.x - 5);
+    }
+    else if (player.body.velocity.x < 0) {
+      player.setVelocityX(player.body.velocity.x + 5);
     }
     else {
       player.setVelocityX(0)
     }
     if (player.body.velocity.y > 0) {
-      player.setVelocityY(player.body.velocity.y - 2);
+      player.setVelocityY(player.body.velocity.y + 5);
     }
     else if (player.body.velocity.y < 0) {
-      player.setVelocityY(player.body.velocity.y + 2);
+      player.setVelocityY(player.body.velocity.y + 5);
     }
     else {
       player.setVelocityY(0)
     }
     if (player.body.velocity.y > 0 && player.body.velocity.x > 0) {
-      player.setVelocityY(player.body.velocity.y - 2);
-      player.setVelocityX(player.body.velocity.x - 2);
+      player.setVelocityY(player.body.velocity.y - 5);
+      player.setVelocityX(player.body.velocity.x - 5);
     }
     else if (player.body.velocity.y < 0 && player.body.velocity.x > 0) {
-      player.setVelocityY(player.body.velocity.y + 2);
-      player.setVelocityX(player.body.velocity.x - 2);
+      player.setVelocityY(player.body.velocity.y + 5);
+      player.setVelocityX(player.body.velocity.x - 5);
     }
     else if (player.body.velocity.y < 0 && player.body.velocity.x < 0) {
-      player.setVelocityY(player.body.velocity.y + 2);
-      player.setVelocityX(player.body.velocity.x + 2);
+      player.setVelocityY(player.body.velocity.y + 5);
+      player.setVelocityX(player.body.velocity.x + 5);
     }
     else if (player.body.velocity.y > 0 && player.body.velocity.x < 0) {
-      player.setVelocityY(player.body.velocity.y - 2);
-      player.setVelocityX(player.body.velocity.x + 2);
+      player.setVelocityY(player.body.velocity.y - 5);
+      player.setVelocityX(player.body.velocity.x + 5);
       // player.anims.stop(null, true);
     }
     else {
@@ -290,11 +282,9 @@ import * as serviceWorker from './serviceWorker';
   }
 
     if (cursor.left.isDown && cursor.up.isDown) {
-      if (player.body.y > 280) {
-        player.setVelocityY(-maxVel);
-        player.setVelocityX(-maxVel);
-        player.anims.play('left', true);
-      }
+      player.setVelocityY(-maxVel);
+      player.setVelocityX(-maxVel);
+      player.anims.play('left', true);
     }
     else if (cursor.left.isDown && cursor.down.isDown) {
       player.setVelocityY(maxVel);
@@ -302,11 +292,9 @@ import * as serviceWorker from './serviceWorker';
       player.anims.play('left', true);
     }
     else if (cursor.right.isDown && cursor.up.isDown) {
-      if (player.body.y > 280) {
         player.setVelocityY(-maxVel);
         player.setVelocityX(maxVel);
         player.anims.play('right', true);
-      }
     }
     else if (cursor.right.isDown && cursor.down.isDown) {
       player.setVelocityY(maxVel);
@@ -329,18 +317,17 @@ import * as serviceWorker from './serviceWorker';
 
   function hitBall (ball, racket) {
     if (Phaser.Input.Keyboard.JustUp(cursor.spacebar)) {
-      // console.log(Math.round(ball.body.x), Math.round(player.body.x))
       player.anims.play('spacebar', true)
       racket.anims.play('spacebar2', true)
-      velocityY = 100 * (-setHitY / 10)
+      velocityY = 100 * (-setHitY / 5)
 
       ball.setVelocityY(velocityY)
 
       if (ball.body.x < player.body.x) {
-        velocityX = 5 * (ball.body.x - player.body.x)
+        velocityX = 3 * (ball.body.x - player.body.x)
         ball.setVelocityX(velocityX);
       } else {
-        velocityX = 5 * (player.body.x - ball.body.x)
+        velocityX = 3 * (player.body.x - ball.body.x)
         ball.setVelocityX(-velocityX);
       }
       distance = 1
@@ -354,18 +341,20 @@ import * as serviceWorker from './serviceWorker';
   }
 
   function hitWall (ball, wall) {
-    ball.setVelocityY(ball.body.velocity.y * -1)
-    wall.setVelocityY(0)
+    console.log('yo?')
+    console.log(ball.body.velocity.y)
+    ball.setVelocityY(200)
+    ball.setVelocityX(Math.random() * 200 - 100)
     detected = true
   }
 
   function hitDivider (divider, player) {
+    console.log('firing')
     player.setVelocityX(0)
     player.setVelocityY(0)
   }
 
   function ballDivider (divider, ball) {
-    console.log(scale)
     if (scale < 1.4) {
       ball.setVelocityX(Math.round(ball.body.velocity.x))
       ball.setVelocityY(Math.round(ball.body.velocity.y * -.8))
@@ -392,6 +381,7 @@ import * as serviceWorker from './serviceWorker';
   }
 
   function reset () {
+    scale = 1.25
     ball.x = 400;
     ball.y = 400;
     ball.setVelocityX(0);
