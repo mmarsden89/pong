@@ -35,6 +35,7 @@ import * as serviceWorker from './serviceWorker';
   let setHitZ = 1
   let distance = 0
   let scale = 1.25
+  let detected = false
 
   function preloadGame () {
     //function where images are loaded
@@ -128,6 +129,7 @@ import * as serviceWorker from './serviceWorker';
     this.physics.add.collider(ball, racket, hitBall, null, this)
     this.physics.add.collider(ball, wall, hitWall, null, this)
     this.physics.add.collider(divider, player, hitDivider, null, this)
+    this.physics.add.overlap(divider, ball, ballDivider, detectedTrue, this)
 
     scoreTextPc = this.add.text(16, 16, 'score: 0', { fontSize: '16px', fill: '#F00' });
     scoreTextPlayer = this.add.text(700, 16, 'score: 0', { fontSize: '16px', fill: '#00F' });
@@ -145,6 +147,12 @@ import * as serviceWorker from './serviceWorker';
     racket.body.x = player.body.x - 15
     racket.body.y = player.body.y - 15
     // console.log(ball.body.scale)
+
+    // if (scale < 1.5 && ball.body.y < 300 && ball.body.velocity.y < 0) {
+    //   console.log(ball.body.y)
+    //   ball.setVelocityX(0)
+    //   ball.setVelocityY(0)
+    // }
 
     if (distance > 0 && distance < 50) {
       ball.setScale(scale + (setHitZ / 60))
@@ -336,6 +344,7 @@ import * as serviceWorker from './serviceWorker';
         ball.setVelocityX(-velocityX);
       }
       distance = 1
+      detected = true
     }
   }
 
@@ -347,11 +356,29 @@ import * as serviceWorker from './serviceWorker';
   function hitWall (ball, wall) {
     ball.setVelocityY(ball.body.velocity.y * -1)
     wall.setVelocityY(0)
+    detected = true
   }
 
   function hitDivider (divider, player) {
     player.setVelocityX(0)
     player.setVelocityY(0)
+  }
+
+  function ballDivider (divider, ball) {
+    console.log(scale)
+    if (scale < 1.4) {
+      ball.setVelocityX(Math.round(ball.body.velocity.x))
+      ball.setVelocityY(Math.round(ball.body.velocity.y * -.8))
+      detected = false
+    }
+  }
+
+  function detectedTrue () {
+    if (detected) {
+      return true
+    } else {
+      return false
+    }
   }
 
   function flipChar () {
