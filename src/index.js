@@ -22,7 +22,7 @@ import * as serviceWorker from './serviceWorker';
 
   var game = new Phaser.Game(config);
 
-  var pc, player, racket, cursor, ball, wall, scoreTextPlayer, scoreTextPc, rect
+  var pc, player, racket, cursor, ball, wall, scoreTextPlayer, scoreTextPc, rect, court
   var scorePlayer = 0
   var scorePc = 0
 
@@ -30,7 +30,11 @@ import * as serviceWorker from './serviceWorker';
   let maxBallVel = 600
   var velocityX = 0
   var velocityY = 0
+  var ballZ = 1
   let setHitY = .1
+  let setHitZ = 1
+  let distance = 0
+  let scale = 1.25
 
   function preloadGame () {
     //function where images are loaded
@@ -38,6 +42,7 @@ import * as serviceWorker from './serviceWorker';
     this.load.image('pc','assets/pc.png')
     this.load.image('ball','assets/ball.png')
     this.load.image('wall','assets/wall.png')
+    this.load.image('court','assets/tempcourt.png')
     this.load.spritesheet('dude', 'assets/playersprite.png', { frameWidth: 64, frameHeight: 64 })
     this.load.spritesheet('racket', 'assets/racket.png', { frameWidth: 64, frameHeight: 64 })
   }
@@ -45,6 +50,9 @@ import * as serviceWorker from './serviceWorker';
   function createGame () {
   //function in which objects are created
     rect = this.add.rectangle(300, 400, 50, 5,  0xff0000)
+    court = this.add.image(400, 300, 'court');
+    court.displayWidth = 800
+    court.displayHeight = 600
 
     cursor = this.input.keyboard.addKeys(
       {up:Phaser.Input.Keyboard.KeyCodes.W,
@@ -95,7 +103,8 @@ import * as serviceWorker from './serviceWorker';
 
     ball.setCollideWorldBounds(true, 0, 0)
     ball.setVelocityY(velocityY);
-    ball.setVelocityX(velocityX);
+    ball.setVelocityX(velocityX)
+    ball.setScale(ballZ)
     ball.setBounce(0)
 
     wall = this.physics.add.sprite(400, 20, 'wall')
@@ -123,6 +132,21 @@ import * as serviceWorker from './serviceWorker';
 
     racket.body.x = player.body.x - 15
     racket.body.y = player.body.y - 15
+    // console.log(ball.body.scale)
+
+    if (distance > 0 && distance < 50) {
+      ball.setScale(scale + (setHitZ / 60))
+      scale = scale + (setHitZ / 60)
+      distance += setHitZ
+    } else if (distance > 49 && distance < 100) {
+      ball.setScale(scale - (setHitZ / 60))
+      scale = scale - (setHitZ / 60)
+      distance += setHitZ
+    } else if (distance >= 100) {
+      setHitZ = 1
+      distance = 0
+      scale = 1.25
+    }
 
     if (cursor.shift.isDown) {
       maxVel = 325
@@ -143,6 +167,7 @@ import * as serviceWorker from './serviceWorker';
     } else if(ball.body.velocity.x === 0) {
       ball.setVelocityY(0)
     }
+
 
     if (cursor.left.isDown) {
       player.setVelocityX(player.body.velocity.x > -maxVel ? player.body.velocity.x - 10 : -maxVel);
@@ -197,6 +222,9 @@ import * as serviceWorker from './serviceWorker';
       if (setHitY < 60) {
         setHitY++
       }
+      if (setHitZ < 6) {
+        setHitZ++
+      }
     }
     else if (Phaser.Input.Keyboard.JustUp(cursor.spacebar)) {
       player.anims.play('spacebar', true)
@@ -204,6 +232,7 @@ import * as serviceWorker from './serviceWorker';
     }
     else {
       setHitY = .1
+      setHitZ = 1
       if (player.body.velocity.x > 0) {
       player.setVelocityX(player.body.velocity.x - 2);
     } else if (player.body.velocity.x < 0) {
@@ -290,7 +319,6 @@ import * as serviceWorker from './serviceWorker';
 
       ball.setVelocityY(velocityY)
 
-      console.log(velocityX, -velocityX)
       if (ball.body.x < player.body.x) {
         velocityX = 5 * (ball.body.x - player.body.x)
         ball.setVelocityX(velocityX);
@@ -298,6 +326,7 @@ import * as serviceWorker from './serviceWorker';
         velocityX = 5 * (player.body.x - ball.body.x)
         ball.setVelocityX(-velocityX);
       }
+      distance = 1
     }
   }
 
