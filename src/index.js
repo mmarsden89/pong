@@ -22,10 +22,12 @@ import * as serviceWorker from './serviceWorker';
 
   var game = new Phaser.Game(config);
 
-  var player, racket, cursor, ball, wall, scoreTextPlayer, scoreTextPc, rect, circle, court, divider
+  var player, racket, cursor, ball, wall, scoreTextPlayer, scoreTextPc, rect, circle, court, divider, pc, pcracket, pchit
+  var pcVelocity = 0
   var scorePlayer = 0
   var scorePc = 0
 
+  pchit = false
   let maxVel = 150
   var velocityX = 0
   var velocityY = 0
@@ -39,13 +41,14 @@ import * as serviceWorker from './serviceWorker';
   function preloadGame () {
     //function where images are loaded
     this.load.image('player','assets/player.png')
-    this.load.image('pc','assets/pc.png')
     this.load.image('ball','assets/ball.png')
     this.load.image('wall','assets/wall.png')
     // this.load.image('divider','assets/divider.png')
     this.load.image('court','assets/tempcourt.png')
+    this.load.spritesheet('pc','assets/pc.png', { frameWidth: 64, frameHeight: 64 })
     this.load.spritesheet('dude', 'assets/playersprite.png', { frameWidth: 64, frameHeight: 64 })
     this.load.spritesheet('racket', 'assets/racket.png', { frameWidth: 64, frameHeight: 64 })
+    this.load.spritesheet('pcracket', 'assets/racket.png', { frameWidth: 64, frameHeight: 64 })
   }
 
   function createGame () {
@@ -101,6 +104,30 @@ import * as serviceWorker from './serviceWorker';
       frameRate: 16
     })
 
+    this.anims.create({
+      key: 'pcleft',
+      frames: this.anims.generateFrameNumbers('pc', { start: 117, end: 125 }),
+      frameRate: 10
+    });
+
+    this.anims.create({
+      key: 'pcright',
+      frames: this.anims.generateFrameNumbers('pc', { start: 143, end: 151 }),
+      frameRate: 10,
+    });
+
+    this.anims.create({
+      key: 'pcspacebar',
+      frames: this.anims.generateFrameNumbers('pc', { start: 186, end: 182 }),
+      frameRate: 16
+    });
+
+    this.anims.create({
+      key: 'pcracket',
+      frames: this.anims.generateFrameNumbers('pcracket', { start: 20, end: 16}),
+      frameRate: 16
+    })
+
     // divider = this.physics.add.image(587, 320, 'divider')
     // divider.setImmovable(true)
 
@@ -114,8 +141,17 @@ import * as serviceWorker from './serviceWorker';
     ball.setScale(ballZ)
     ball.setBounce(0)
 
-    wall = this.physics.add.image(600, 20, 'wall')
-    wall.setImmovable(true)
+    // wall = this.physics.add.image(600, 20, 'wall')
+    // wall.setImmovable(true)
+    pc = this.physics.add.sprite(600, 80, 'pc')
+    pc.setSize(64, 35, 0, 15)
+    pc.setCollideWorldBounds(true)
+    pc.setImmovable(true)
+    pc.setVelocityX(pcVelocity)
+    pc.setFrame(27)
+    pcracket = this.physics.add.sprite(335, 485, 'pcracket')
+    pcracket.setSize(80, 74, 0, 0)
+
     player = this.physics.add.sprite(350, 500, 'dude');
     player.setSize(30, 35, 30, 15)
     player.setImmovable(true)
@@ -125,8 +161,9 @@ import * as serviceWorker from './serviceWorker';
     player.setBounce(.5)
 
     this.physics.add.collider(ball, player, hitPlayer, null, this)
-    this.physics.add.collider(ball, racket, hitBall, null, this)
-    this.physics.add.collider(ball, wall, hitWall, null, this)
+    this.physics.add.collider(ball, pc, hitPC, null, this)
+    this.physics.add.overlap(ball, racket, hitBall, null, this)
+    // this.physics.add.collider(ball, wall, hitWall, null, this)
     // this.physics.add.collider(divider, player, hitDivider, null, this)
     // this.physics.add.overlap(divider, ball, ballDivider, detectedTrue, this)
 
@@ -141,8 +178,35 @@ import * as serviceWorker from './serviceWorker';
     circle.x = player.body.x + 14.5
     circle.y = player.body.y + 45
 
-    racket.body.x = player.body.x - 15
-    racket.body.y = player.body.y - 15
+    pcracket.body.x = pc.body.x - 10
+    pcracket.body.y = pc.body.y + 5
+
+    racket.body.x = player.body.x - 16
+    racket.body.y = player.body.y - 9
+
+
+    if (pchit === true) {
+      pc.anims.play('pcspacebar', true)
+      setTimeout(function() {
+        pchit = false
+      }, 300)
+    }
+    else if (pc.body.x < ball.body.x - 10) {
+      pcVelocity < 201 ? pcVelocity += (ball.body.x - pc.body.x) / 25 :
+      pcVelocity = 200
+      pcracket.setFrame(19)
+      pc.anims.play('pcright', true)
+      pc.setVelocityX(pcVelocity)
+    } else if (pc.body.x > ball.body.x + 10) {
+      pcVelocity > -201 ? pcVelocity -= (pc.body.x - ball.body.x) / 25 :
+      pcVelocity = -200
+      pcracket.setFrame(16)
+      pc.anims.play('pcleft', true)
+      pc.setVelocityX(pcVelocity)
+    } else if (pc.body.x < ball.body.x || pc.body.x > ball.body.x) {
+      pcVelocity = 0
+      pc.setVelocityX(pcVelocity)
+    }
 
     if (distance > 0 && distance < 50) {
       ball.setScale(scale + (setHitZ / 60))
@@ -335,21 +399,30 @@ import * as serviceWorker from './serviceWorker';
     }
   }
 
+  function hitPC(ball, pc) {
+    pchit = true
+    pc.anims.stop(null, true);
+    scale = 1.25
+    ball.setVelocityY(Math.floor(Math.random() * 300) + 100)
+    ball.setVelocityX((Math.random() * 200) - 100)
+    setHitZ = (Math.random() * 6) + 1
+    distance = 1
+    pc.anims.play('pcspacebar', true)
+    pcracket.anims.play('pcracket', true)
+  }
+
   function hitPlayer (ball, player) {
     ball.setVelocityY(0)
     ball.setVelocityX(0);
   }
 
   function hitWall (ball, wall) {
-    console.log('yo?')
-    console.log(ball.body.velocity.y)
     ball.setVelocityY(200)
     ball.setVelocityX(Math.random() * 200 - 100)
     detected = true
   }
 
   function hitDivider (divider, player) {
-    console.log('firing')
     player.setVelocityX(0)
     player.setVelocityY(0)
   }
