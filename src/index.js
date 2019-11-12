@@ -37,6 +37,7 @@ import * as serviceWorker from './serviceWorker';
   let setHitZ = 1
   let distance = 0
   let scale = 1.25
+  let direction = 2
 
   function preloadGame () {
     //function where images are loaded
@@ -45,9 +46,11 @@ import * as serviceWorker from './serviceWorker';
     this.load.image('wall','assets/wall.png')
     this.load.image('grass','assets/grass.png')
     this.load.image('trunks','assets/trunk.png')
+    this.load.image('water','assets/water.png')
     this.load.image('treetop','assets/treetop.png')
     this.load.image('court','assets/tempcourt.png')
     this.load.image('tiles', 'assets/grass.png');
+    this.load.image('dirt', 'assets/dirt.png');
     this.load.spritesheet('dude', 'assets/playersprite.png', { frameWidth: 64, frameHeight: 64 })
     this.load.spritesheet('racket', 'assets/racket.png', { frameWidth: 64, frameHeight: 64 })
     this.load.tilemapTiledJSON('map', 'assets/newmap.json');
@@ -62,7 +65,12 @@ import * as serviceWorker from './serviceWorker';
     const tileset2 = map.addTilesetImage('trunk', 'trunks')
     const trunkset = map.createStaticLayer('Trees2', tileset2)
     const treetiles = map.addTilesetImage('treetop', 'treetop')
+    const waterset = map.addTilesetImage('water', 'water')
+    const watertiles = map.createStaticLayer('Water', 'water')
+    const dirtset = map.addTilesetImage('dirt', 'dirt')
+    const dirttiles = map.createStaticLayer('Dirt', 'dirt')
     trunkset.setCollisionByExclusion(-1, true);
+    watertiles.setCollisionByExclusion(-1, true);
 
 
     rect = this.add.rectangle(300, 400, 50, 5,  0xff0000)
@@ -109,7 +117,22 @@ import * as serviceWorker from './serviceWorker';
     });
 
     this.anims.create({
-      key: 'spacebar',
+      key: 'hitup',
+      frames: this.anims.generateFrameNumbers('dude', { start: 160, end: 156 }),
+      frameRate: 16
+    });
+    this.anims.create({
+      key: 'hitdown',
+      frames: this.anims.generateFrameNumbers('dude', { start: 160, end: 156 }),
+      frameRate: 16
+    });
+    this.anims.create({
+      key: 'hitleft',
+      frames: this.anims.generateFrameNumbers('dude', { start: 160, end: 156 }),
+      frameRate: 16
+    });
+    this.anims.create({
+      key: 'hitright',
       frames: this.anims.generateFrameNumbers('dude', { start: 160, end: 156 }),
       frameRate: 16
     });
@@ -131,7 +154,7 @@ import * as serviceWorker from './serviceWorker';
     ball.setScale(ballZ)
     ball.setBounce(0)
 
-    player = this.physics.add.sprite(350, 500, 'dude');
+    player = this.physics.add.sprite(350, 300, 'dude');
     player.setSize(30, 35, 30, 15)
     player.setImmovable(true)
     racket = this.physics.add.sprite(335, 485, 'racket')
@@ -146,6 +169,7 @@ import * as serviceWorker from './serviceWorker';
     this.physics.add.collider(ball, player, hitPlayer, null, this)
     this.physics.add.overlap(ball, racket, hitBall, null, this)
     this.physics.add.collider(player, trunkset)
+    this.physics.add.collider(player, watertiles)
   }
 
 
@@ -174,7 +198,7 @@ import * as serviceWorker from './serviceWorker';
     // }
 
     if (cursor.shift.isDown) {
-      maxVel = 250
+      maxVel = 200
     } else {
       maxVel = 150
     }
@@ -245,7 +269,7 @@ import * as serviceWorker from './serviceWorker';
       }
     }
     else if (Phaser.Input.Keyboard.JustUp(cursor.spacebar)) {
-      player.anims.play('spacebar', true)
+      player.anims.play('hitup', true)
       racket.anims.play('spacebar2', true)
     }
     else {
@@ -279,7 +303,7 @@ import * as serviceWorker from './serviceWorker';
 
   function hitBall (ball, racket) {
     if (Phaser.Input.Keyboard.JustUp(cursor.spacebar)) {
-      player.anims.play('spacebar', true)
+      player.anims.play('hitup', true)
       racket.anims.play('spacebar2', true)
       velocityY = 100 * (-setHitY / 5)
 
