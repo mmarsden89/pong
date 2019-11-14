@@ -49,6 +49,7 @@ import * as serviceWorker from './serviceWorker';
     this.load.image('tiles', 'assets/grass.png');
     this.load.image('dirt', 'assets/dirt.png');
     this.load.image('bridge', 'assets/bridges.png');
+    this.load.image('arena', 'assets/castlewalls.png');
     this.load.spritesheet('npc','assets/pc.png', { frameWidth: 64, frameHeight: 64 })
     this.load.spritesheet('dude', 'assets/playersprite.png', { frameWidth: 64, frameHeight: 64 })
     this.load.spritesheet('racket', 'assets/racket.png', { frameWidth: 64, frameHeight: 64 })
@@ -73,14 +74,18 @@ import * as serviceWorker from './serviceWorker';
     const housetiles2 = map.createStaticLayer('House2', 'house')
     const houseset3 = map.addTilesetImage('house', 'house')
     const housetiles3 = map.createStaticLayer('House3', 'house')
-    const houseset4 = map.addTilesetImage('house', 'house')
-    const housetiles4 = map.createStaticLayer('House4', 'house')
     const grass2 = map.addTilesetImage('grass', 'tiles')
     const grasstiles2 = map.createStaticLayer('Grass2', 'grass')
     const bridge = map.addTilesetImage('bridges', 'bridge')
     const bridgetile = map.createStaticLayer('Bridge', 'bridges')
+    const arena = map.addTilesetImage('castlewalls', 'arena')
+    const tennisarena = map.createStaticLayer('TennisArena', 'castlewalls')
     trunkset.setCollisionByExclusion(-1, true);
     watertiles.setCollisionByExclusion(-1, true);
+    housetiles.setCollisionByExclusion(-1, true);
+    housetiles2.setCollisionByExclusion(-1, true);
+    housetiles3.setCollisionByExclusion(-1, true);
+    tennisarena.setCollisionByExclusion(-1, true);
 
     let bomb = this.add.sprite(game.config.width/2,game.config.height/2, "npc")
     bomb.setFrame(131)
@@ -183,6 +188,10 @@ import * as serviceWorker from './serviceWorker';
     this.physics.add.overlap(ball, racket, hitBall, null, this)
     this.physics.add.collider(player, trunkset)
     this.physics.add.collider(player, watertiles)
+    this.physics.add.collider(player, housetiles)
+    this.physics.add.collider(player, housetiles2)
+    this.physics.add.collider(player, housetiles3)
+    this.physics.add.collider(player, tennisarena)
   }
 
 
