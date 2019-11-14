@@ -48,6 +48,7 @@ import * as serviceWorker from './serviceWorker';
     this.load.image('house','assets/house.png')
     this.load.image('tiles', 'assets/grass.png');
     this.load.image('dirt', 'assets/dirt.png');
+    this.load.image('bridge', 'assets/bridges.png');
     this.load.spritesheet('npc','assets/pc.png', { frameWidth: 64, frameHeight: 64 })
     this.load.spritesheet('dude', 'assets/playersprite.png', { frameWidth: 64, frameHeight: 64 })
     this.load.spritesheet('racket', 'assets/racket.png', { frameWidth: 64, frameHeight: 64 })
@@ -56,7 +57,6 @@ import * as serviceWorker from './serviceWorker';
 
   function createGame () {
   //function in which objects are created
-    // const npc = new NPC({scene: this, x: 200, y: 200})
     const map = this.make.tilemap({ key: 'map' });
     const tileset = map.addTilesetImage('grass', 'tiles');
     const platforms = map.createStaticLayer('Ground', tileset, 0, 0)
@@ -77,6 +77,8 @@ import * as serviceWorker from './serviceWorker';
     const housetiles4 = map.createStaticLayer('House4', 'house')
     const grass2 = map.addTilesetImage('grass', 'tiles')
     const grasstiles2 = map.createStaticLayer('Grass2', 'grass')
+    const bridge = map.addTilesetImage('bridges', 'bridge')
+    const bridgetile = map.createStaticLayer('Bridge', 'bridges')
     trunkset.setCollisionByExclusion(-1, true);
     watertiles.setCollisionByExclusion(-1, true);
 
@@ -176,7 +178,7 @@ import * as serviceWorker from './serviceWorker';
     // make the camera follow the player
     this.cameras.main.startFollow(player);
 
-    this.physics.world.setBounds(0, 0, 5400, 4800)
+    this.physics.world.setBounds(0, 0, 6400, 4800)
     this.physics.add.collider(ball, player, hitPlayer, null, this)
     this.physics.add.overlap(ball, racket, hitBall, null, this)
     this.physics.add.collider(player, trunkset)
