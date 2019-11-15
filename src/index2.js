@@ -136,6 +136,7 @@ import * as serviceWorker from './serviceWorker';
     circle2 = this.add.circle(300, 400, 12, 0x396022, .3)
 
     ball = this.physics.add.sprite(400, 400, 'ball')
+        // ball.setDrag(200, 200)
 
     ball.setCollideWorldBounds(true, 0, 0)
     ball.setVelocityY(velocityY);

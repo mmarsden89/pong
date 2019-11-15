@@ -34,7 +34,7 @@ import * as serviceWorker from './serviceWorker';
   var velocityX = 0
   var velocityY = 0
   let setHitY = .1
-  let direction = ['hitdown', 131]
+  let direction = ['hitdown', 131, 'racketdown']
 
   function preloadGame () {
     //function where images are loaded
@@ -52,7 +52,7 @@ import * as serviceWorker from './serviceWorker';
     this.load.image('arena', 'assets/castlewalls.png');
     this.load.spritesheet('npc','assets/pc.png', { frameWidth: 64, frameHeight: 64 })
     this.load.spritesheet('dude', 'assets/playersprite.png', { frameWidth: 64, frameHeight: 64 })
-    this.load.spritesheet('racket', 'assets/racket.png', { frameWidth: 64, frameHeight: 64 })
+    this.load.spritesheet('racket', 'assets/racket2.png', { frameWidth: 64, frameHeight: 64 })
     this.load.tilemapTiledJSON('map', 'assets/newmap.json');
   }
 
@@ -87,7 +87,7 @@ import * as serviceWorker from './serviceWorker';
     housetiles3.setCollisionByExclusion(-1, true);
     tennisarena.setCollisionByExclusion(-1, true);
 
-    let bomb = this.add.sprite(game.config.width/2,game.config.height/2, "npc")
+    let bomb = this.add.sprite(game.config.width/2 ,game.config.height/2, "npc")
     bomb.setFrame(131)
     rect = this.add.rectangle(300, 400, 50, 5,  0xff0000)
 
@@ -154,8 +154,23 @@ import * as serviceWorker from './serviceWorker';
     });
 
     this.anims.create({
-      key: 'spacebar2',
-      frames: this.anims.generateFrameNumbers('racket', { start: 4, end: 0}),
+      key: 'racketup',
+      frames: this.anims.generateFrameNumbers('racket', { start: 160, end: 156}),
+      frameRate: 16
+    })
+    this.anims.create({
+      key: 'racketdown',
+      frames: this.anims.generateFrameNumbers('racket', { start: 186, end: 182}),
+      frameRate: 16
+    })
+    this.anims.create({
+      key: 'racketleft',
+      frames: this.anims.generateFrameNumbers('racket', { start: 173, end: 169}),
+      frameRate: 16
+    })
+    this.anims.create({
+      key: 'racketright',
+      frames: this.anims.generateFrameNumbers('racket', { start: 199, end: 195}),
       frameRate: 16
     })
 
@@ -163,29 +178,36 @@ import * as serviceWorker from './serviceWorker';
     circle = this.add.circle(300, 400, 12, 0x396022, .3)
 
     ball = this.physics.add.sprite(400, 300, 'ball')
+    ball.setDrag(200, 200)
+    ball.useDamping = true;
 
     ball.setCollideWorldBounds(true, 1, 1)
     ball.setVelocityY(velocityY);
     ball.setVelocityX(velocityX)
-    ball.setBounce(5)
+    ball.setBounce(1)
 
-    player = this.physics.add.sprite(350, 300, 'dude');
+    player = this.physics.add.sprite(1000, 1000, 'dude');
     player.setCollideWorldBounds(true, 0, 0)
-    player.setSize(30, 35, 30, 15)
+    player.setSize(32, 32, 16, 16)
     player.setImmovable(true)
     player.setFrame(131)
     racket = this.physics.add.sprite(335, 485, 'racket')
     racket.setSize(80, 74, 0, 0)
-    player.setBounce(.5)
+    player.setBounce(0)
 
     const treetops = map.createStaticLayer('TreeTops', treetiles)
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     // make the camera follow the player
     this.cameras.main.startFollow(player);
 
-    this.physics.world.setBounds(0, 0, 6400, 4800)
+    this.physics.world.setBounds(0, 0, 4000, 4000)
     this.physics.add.collider(ball, player, hitPlayer, null, this)
     this.physics.add.overlap(ball, racket, hitBall, null, this)
+    this.physics.add.collider(ball, housetiles)
+    this.physics.add.collider(ball, housetiles2)
+    this.physics.add.collider(ball, housetiles3)
+    this.physics.add.collider(ball, watertiles)
+    this.physics.add.collider(ball, tennisarena)
     this.physics.add.collider(player, trunkset)
     this.physics.add.collider(player, watertiles)
     this.physics.add.collider(player, housetiles)
@@ -203,7 +225,7 @@ import * as serviceWorker from './serviceWorker';
     circle.y = player.body.y + 45
 
     racket.body.x = player.body.x - 16
-    racket.body.y = player.body.y - 9
+    racket.body.y = player.body.y - 16
     //
 
     if (cursor.shift.isDown) {
@@ -212,69 +234,59 @@ import * as serviceWorker from './serviceWorker';
       maxVel = 150
     }
 
-    if (ball.body.velocity.y < 0) {
-      let currentVeloc = ball.body.velocity.y
-      ball.setVelocityY(currentVeloc + .1)
-    } else if (ball.body.velocity.y > 0) {
-      let currentVeloc = ball.body.velocity.y
-      ball.setVelocityY(currentVeloc - .1)
-    }
-
-    if (ball.body.velocity.y === 0) {
-      ball.setVelocityX(0)
-    } else if(ball.body.velocity.x === 0) {
-      ball.setVelocityY(0)
-    }
-
-
     if (cursor.left.isDown) {
       player.anims.play('left', true);
-      direction = ['hitleft', 173]
+      direction = ['hitleft', 173, 'racketleft']
         player.setVelocityX(-maxVel)
+        player.setVelocityY(0)
     } else if (Phaser.Input.Keyboard.JustUp(cursor.left)) {
       player.anims.play('leftstand', true);
     }
     else if (cursor.right.isDown) {
       player.anims.play('right', true);
-      direction = ['hitright', 199]
+      direction = ['hitright', 199, 'racketright']
       player.setVelocityX(maxVel);
+      player.setVelocityY(0)
       // racket.setFrame(0)
     }
     else if (Phaser.Input.Keyboard.JustUp(cursor.right)) {
       player.anims.stop(null, true);
     }
     else if (cursor.up.isDown) {
-      player.setVelocityY(player.body.velocity.y > -maxVel ? player.body.velocity.y - 10 : -maxVel);
+      player.setVelocityY(-maxVel);
       player.setVelocityX(0);
       player.anims.play('up', true);
       racket.setFrame(0)
-      direction = ['hitup', 160]
+      direction = ['hitup', 160, 'racketup']
     }
     else if (Phaser.Input.Keyboard.JustUp(cursor.up)) {
       player.anims.stop(null, true);
     }
     else if (cursor.down.isDown) {
-      player.setVelocityY(player.body.velocity.y < maxVel ? player.body.velocity.y + 10 : maxVel);
+      player.setVelocityY(maxVel);
       player.setVelocityX(0);
       player.anims.play('down', true);
       racket.setFrame(0)
-      direction = ['hitdown', 186]
+      direction = ['hitdown', 186, 'racketdown']
     }
     else if (Phaser.Input.Keyboard.JustUp(cursor.down)) {
       player.anims.stop(null, true);
+    }
+    else if (cursor.reset.isDown) {
+      reset()
     }
     else if (cursor.spacebar.isDown) {
       player.setVelocityX(0)
       player.setVelocityY(0)
       player.setFrame(direction[1])
-      racket.setFrame(5)
+      racket.setFrame(direction[1] + 1)
       if (setHitY < 60) {
         setHitY++
       }
     }
     else if (Phaser.Input.Keyboard.JustUp(cursor.spacebar)) {
       player.anims.play(checkDirection(), true)
-      racket.anims.play('spacebar2', true)
+      racket.anims.play(direction[2], true)
     }
     else {
       setHitY = .1
@@ -307,15 +319,21 @@ import * as serviceWorker from './serviceWorker';
   function hitBall (ball, racket) {
     if (Phaser.Input.Keyboard.JustUp(cursor.spacebar)) {
       player.anims.play(checkDirection[0], true)
-      racket.anims.play('spacebar2', true)
+      racket.anims.play((direction[1]), true)
 
 
       ball.body.y - player.body.y > 0 ? velocityY = 300 : velocityY = -300
-      velocityX = (ball.body.x - player.body.x) * 35
+      velocityX = (ball.body.x - player.body.x) * 5
 
       ball.setVelocityX(velocityX)
       ball.setVelocityY(velocityY)
     }
+  }
+  function reset () {
+    ball.x = player.body.x;
+    ball.y = player.body.y + 50;
+    ball.setVelocityX(0);
+    ball.setVelocityY(0);
   }
 
   function checkDirection () {
