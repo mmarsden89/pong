@@ -27,14 +27,15 @@ import * as serviceWorker from './serviceWorker';
   };
 
   var game = new Phaser.Game(config);
+  game.renderer.renderSession.roundPixels = true;
 
-  var player, racket, cursor, ball, rect, circle
+  var player, racket, cursor, ball, circle
 
   let maxVel = 150
+  let maxballvel = 1000
   var velocityX = 0
   var velocityY = 0
-  let setHitY = .1
-  let direction = ['hitdown', 131, 'racketdown']
+  let direction = ['hitdown', 132, 'racketdown']
 
   function preloadGame () {
     //function where images are loaded
@@ -60,26 +61,26 @@ import * as serviceWorker from './serviceWorker';
   //function in which objects are created
     const map = this.make.tilemap({ key: 'map' });
     const tileset = map.addTilesetImage('grass', 'tiles');
-    const platforms = map.createStaticLayer('Ground', tileset, 0, 0)
+    const platforms = map.createDynamicLayer('Ground', tileset, 0, 0)
     const tileset2 = map.addTilesetImage('trunk', 'trunks')
-    const trunkset = map.createStaticLayer('Trees2', tileset2)
+    const trunkset = map.createDynamicLayer('Trees2', tileset2)
     const treetiles = map.addTilesetImage('treetop', 'treetop')
     const waterset = map.addTilesetImage('water', 'water')
-    const watertiles = map.createStaticLayer('Water', 'water')
+    const watertiles = map.createDynamicLayer('Water', 'water')
     const dirtset = map.addTilesetImage('dirt', 'dirt')
-    const dirttiles = map.createStaticLayer('Dirt', 'dirt')
+    const dirttiles = map.createDynamicLayer('Dirt', 'dirt')
     const houseset = map.addTilesetImage('house', 'house')
-    const housetiles = map.createStaticLayer('House', 'house')
+    const housetiles = map.createDynamicLayer('House', 'house')
     const houseset2 = map.addTilesetImage('house', 'house')
-    const housetiles2 = map.createStaticLayer('House2', 'house')
+    const housetiles2 = map.createDynamicLayer('House2', 'house')
     const houseset3 = map.addTilesetImage('house', 'house')
-    const housetiles3 = map.createStaticLayer('House3', 'house')
+    const housetiles3 = map.createDynamicLayer('House3', 'house')
     const grass2 = map.addTilesetImage('grass', 'tiles')
-    const grasstiles2 = map.createStaticLayer('Grass2', 'grass')
+    const grasstiles2 = map.createDynamicLayer('Grass2', 'grass')
     const bridge = map.addTilesetImage('bridges', 'bridge')
-    const bridgetile = map.createStaticLayer('Bridge', 'bridges')
+    const bridgetile = map.createDynamicLayer('Bridge', 'bridges')
     const arena = map.addTilesetImage('castlewalls', 'arena')
-    const tennisarena = map.createStaticLayer('TennisArena', 'castlewalls')
+    const tennisarena = map.createDynamicLayer('TennisArena', 'castlewalls')
     trunkset.setCollisionByExclusion(-1, true);
     watertiles.setCollisionByExclusion(-1, true);
     housetiles.setCollisionByExclusion(-1, true);
@@ -89,7 +90,6 @@ import * as serviceWorker from './serviceWorker';
 
     let bomb = this.add.sprite(game.config.width/2 ,game.config.height/2, "npc")
     bomb.setFrame(131)
-    rect = this.add.rectangle(300, 400, 50, 5,  0xff0000)
 
     cursor = this.input.keyboard.addKeys(
       {up:Phaser.Input.Keyboard.KeyCodes.W,
@@ -178,13 +178,11 @@ import * as serviceWorker from './serviceWorker';
     circle = this.add.circle(300, 400, 12, 0x396022, .3)
 
     ball = this.physics.add.sprite(400, 300, 'ball')
-    ball.setDrag(200, 200)
-    ball.useDamping = true;
 
-    ball.setCollideWorldBounds(true, 1, 1)
+    ball.setCollideWorldBounds(true, 0, 0)
     ball.setVelocityY(velocityY);
     ball.setVelocityX(velocityX)
-    ball.setBounce(1)
+    ball.setBounce(0)
 
     player = this.physics.add.sprite(1000, 1000, 'dude');
     player.setCollideWorldBounds(true, 0, 0)
@@ -195,7 +193,7 @@ import * as serviceWorker from './serviceWorker';
     racket.setSize(80, 74, 0, 0)
     player.setBounce(0)
 
-    const treetops = map.createStaticLayer('TreeTops', treetiles)
+    const treetops = map.createDynamicLayer('TreeTops', treetiles)
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     // make the camera follow the player
     this.cameras.main.startFollow(player);
@@ -218,9 +216,6 @@ import * as serviceWorker from './serviceWorker';
 
 
   function updateGame () {
-    setHitY < 1 ? rect.width = 0 : rect.width = 10 * (setHitY / 10)
-    rect.x = player.body.x + 12
-    rect.y = player.body.y + 64
     circle.x = player.body.x + 14.5
     circle.y = player.body.y + 45
 
@@ -236,7 +231,7 @@ import * as serviceWorker from './serviceWorker';
 
     if (cursor.left.isDown) {
       player.anims.play('left', true);
-      direction = ['hitleft', 173, 'racketleft']
+      direction = ['hitleft', 174, 'racketleft']
         player.setVelocityX(-maxVel)
         player.setVelocityY(0)
     } else if (Phaser.Input.Keyboard.JustUp(cursor.left)) {
@@ -244,7 +239,7 @@ import * as serviceWorker from './serviceWorker';
     }
     else if (cursor.right.isDown) {
       player.anims.play('right', true);
-      direction = ['hitright', 199, 'racketright']
+      direction = ['hitright', 200, 'racketright']
       player.setVelocityX(maxVel);
       player.setVelocityY(0)
       // racket.setFrame(0)
@@ -257,7 +252,7 @@ import * as serviceWorker from './serviceWorker';
       player.setVelocityX(0);
       player.anims.play('up', true);
       racket.setFrame(0)
-      direction = ['hitup', 160, 'racketup']
+      direction = ['hitup', 161, 'racketup']
     }
     else if (Phaser.Input.Keyboard.JustUp(cursor.up)) {
       player.anims.stop(null, true);
@@ -267,10 +262,12 @@ import * as serviceWorker from './serviceWorker';
       player.setVelocityX(0);
       player.anims.play('down', true);
       racket.setFrame(0)
-      direction = ['hitdown', 186, 'racketdown']
+      direction = ['hitdown', 187, 'racketdown']
     }
     else if (Phaser.Input.Keyboard.JustUp(cursor.down)) {
       player.anims.stop(null, true);
+      player.setFrame(direction[131])
+      racket.setFrame(direction[182])
     }
     else if (cursor.reset.isDown) {
       reset()
@@ -279,17 +276,13 @@ import * as serviceWorker from './serviceWorker';
       player.setVelocityX(0)
       player.setVelocityY(0)
       player.setFrame(direction[1])
-      racket.setFrame(direction[1] + 1)
-      if (setHitY < 60) {
-        setHitY++
-      }
+      racket.setFrame(direction[1])
     }
     else if (Phaser.Input.Keyboard.JustUp(cursor.spacebar)) {
-      player.anims.play(checkDirection(), true)
+      player.anims.play(direction[0], true)
       racket.anims.play(direction[2], true)
     }
     else {
-      setHitY = .1
       player.setVelocityY(0)
       player.setVelocityX(0)
   }
@@ -317,27 +310,35 @@ import * as serviceWorker from './serviceWorker';
   }
 
   function hitBall (ball, racket) {
+
+    if (direction[1] === 200) {
+      velocityX = maxballvel
+      velocityY = 0
+    }
+    else if (direction[1] === 174) {
+      velocityX = -maxballvel
+      velocityY = 0
+    }
+    else if (direction[1] === 187) {
+      velocityY = maxballvel
+      velocityX = 0
+    }
+    else if (direction[1] === 161){
+      velocityY = -maxballvel
+      velocityX = 0
+    }
     if (Phaser.Input.Keyboard.JustUp(cursor.spacebar)) {
-      player.anims.play(checkDirection[0], true)
-      racket.anims.play((direction[1]), true)
-
-
-      ball.body.y - player.body.y > 0 ? velocityY = 300 : velocityY = -300
-      velocityX = (ball.body.x - player.body.x) * 5
-
-      ball.setVelocityX(velocityX)
-      ball.setVelocityY(velocityY)
+      player.anims.play(direction[0], true)
+      racket.anims.play((direction[2]), true)
+      ball.setVelocity(velocityX, velocityY)
     }
   }
+
   function reset () {
     ball.x = player.body.x;
     ball.y = player.body.y + 50;
     ball.setVelocityX(0);
     ball.setVelocityY(0);
-  }
-
-  function checkDirection () {
-    return direction[0]
   }
 
   function hitPlayer (ball, player) {
