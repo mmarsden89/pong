@@ -27,15 +27,15 @@ import * as serviceWorker from './serviceWorker';
   };
 
   var game = new Phaser.Game(config);
-  game.renderer.renderSession.roundPixels = true;
 
-  var player, racket, cursor, ball, circle
+  var player, racket, cursor, ball, circle, ballCollision, bomb
 
   let maxVel = 150
   let maxballvel = 1000
   var velocityX = 0
   var velocityY = 0
   let direction = ['hitdown', 132, 'racketdown']
+  let npcDirect = Math.floor(Math.random() * 4)
 
   function preloadGame () {
     //function where images are loaded
@@ -87,9 +87,6 @@ import * as serviceWorker from './serviceWorker';
     housetiles2.setCollisionByExclusion(-1, true);
     housetiles3.setCollisionByExclusion(-1, true);
     tennisarena.setCollisionByExclusion(-1, true);
-
-    let bomb = this.add.sprite(game.config.width/2 ,game.config.height/2, "npc")
-    bomb.setFrame(131)
 
     cursor = this.input.keyboard.addKeys(
       {up:Phaser.Input.Keyboard.KeyCodes.W,
@@ -174,6 +171,31 @@ import * as serviceWorker from './serviceWorker';
       frameRate: 16
     })
 
+    this.anims.create({
+      key: 'npcleft',
+      frames: this.anims.generateFrameNumbers('npc', { start: 117, end: 125 }),
+      frameRate: 10
+    });
+
+    this.anims.create({
+      key: 'npcright',
+      frames: this.anims.generateFrameNumbers('npc', { start: 143, end: 151 }),
+      frameRate: 10,
+    });
+
+    this.anims.create({
+      key: 'npcup',
+      frames: this.anims.generateFrameNumbers('npc', { start: 105, end: 111 }),
+      frameRate: 10,
+    });
+
+    this.anims.create({
+      key: 'npcdown',
+      frames: this.anims.generateFrameNumbers('npc', { start: 131, end: 138 }),
+      frameRate: 10,
+    });
+
+
 
     circle = this.add.circle(300, 400, 12, 0x396022, .3)
 
@@ -184,7 +206,7 @@ import * as serviceWorker from './serviceWorker';
     ball.setVelocityX(velocityX)
     ball.setBounce(0)
 
-    player = this.physics.add.sprite(1000, 1000, 'dude');
+    player = this.physics.add.sprite(300, 400, 'dude');
     player.setCollideWorldBounds(true, 0, 0)
     player.setSize(32, 32, 16, 16)
     player.setImmovable(true)
@@ -193,16 +215,33 @@ import * as serviceWorker from './serviceWorker';
     racket.setSize(80, 74, 0, 0)
     player.setBounce(0)
 
+    // let bomb = this.add.sprite(game.config.width/2 , game.config.height/2, "npc")
+    bomb = new Npc({
+      scene: this,
+      x: 350 ,
+      y: 300,
+      key: "npc",
+      collisions: watertiles
+    })
+    // var hero = this.add.existing( new spriteStats(this, 100, 450, 'hero', 0) );
+    // let bomb = this.add.existing( new Npc(this, 100, 450, 'npc'))
+    bomb.setFrame(131)
+    bomb.setSize(64, 64, 0, 0)
+
     const treetops = map.createDynamicLayer('TreeTops', treetiles)
     this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     // make the camera follow the player
     this.cameras.main.startFollow(player);
 
-    this.physics.world.setBounds(0, 0, 4000, 4000)
+    ballCollision = this.physics.add.group()
+    ballCollision.add(housetiles)
+    ballCollision.add(housetiles2)
+    // ballCollision.setCollisionByExclusion(-1, true);
+
+    this.physics.world.setBounds(0, 0, 4000, 2250)
     this.physics.add.collider(ball, player, hitPlayer, null, this)
     this.physics.add.overlap(ball, racket, hitBall, null, this)
-    this.physics.add.collider(ball, housetiles)
-    this.physics.add.collider(ball, housetiles2)
+    this.physics.add.collider(ball, ballCollision)
     this.physics.add.collider(ball, housetiles3)
     this.physics.add.collider(ball, watertiles)
     this.physics.add.collider(ball, tennisarena)
@@ -212,10 +251,17 @@ import * as serviceWorker from './serviceWorker';
     this.physics.add.collider(player, housetiles2)
     this.physics.add.collider(player, housetiles3)
     this.physics.add.collider(player, tennisarena)
+    // this.physics.add.collider(bomb, player)
+    this.physics.add.collider(bomb, trunkset)
+    this.physics.add.collider(bomb, watertiles)
+    this.physics.add.collider(bomb, housetiles)
+    this.physics.add.collider(bomb, housetiles2)
+    this.physics.add.collider(bomb, housetiles3)
   }
 
 
   function updateGame () {
+    bomb.move(npcDirect)
     circle.x = player.body.x + 14.5
     circle.y = player.body.y + 45
 
@@ -266,8 +312,7 @@ import * as serviceWorker from './serviceWorker';
     }
     else if (Phaser.Input.Keyboard.JustUp(cursor.down)) {
       player.anims.stop(null, true);
-      player.setFrame(direction[131])
-      racket.setFrame(direction[182])
+      player.setFrame(131)
     }
     else if (cursor.reset.isDown) {
       reset()
@@ -335,8 +380,8 @@ import * as serviceWorker from './serviceWorker';
   }
 
   function reset () {
-    ball.x = player.body.x;
-    ball.y = player.body.y + 50;
+    ball.x = player.body.x + 16;
+    ball.y = player.body.y - 10;
     ball.setVelocityX(0);
     ball.setVelocityY(0);
   }

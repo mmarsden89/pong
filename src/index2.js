@@ -48,8 +48,8 @@ import * as serviceWorker from './serviceWorker';
     this.load.image('court','assets/tempcourt.png')
     this.load.spritesheet('pc','assets/pc.png', { frameWidth: 64, frameHeight: 64 })
     this.load.spritesheet('dude', 'assets/playersprite.png', { frameWidth: 64, frameHeight: 64 })
-    this.load.spritesheet('racket', 'assets/racket.png', { frameWidth: 64, frameHeight: 64 })
-    this.load.spritesheet('pcracket', 'assets/racket.png', { frameWidth: 64, frameHeight: 64 })
+    this.load.spritesheet('racket', 'assets/racket2.png', { frameWidth: 64, frameHeight: 64 })
+    this.load.spritesheet('pcracket', 'assets/racket2.png', { frameWidth: 64, frameHeight: 64 })
   }
 
   function createGame () {
@@ -101,7 +101,7 @@ import * as serviceWorker from './serviceWorker';
 
     this.anims.create({
       key: 'spacebar2',
-      frames: this.anims.generateFrameNumbers('racket', { start: 4, end: 0}),
+      frames: this.anims.generateFrameNumbers('racket', { start: 160, end: 156}),
       frameRate: 16
     })
 
@@ -188,7 +188,7 @@ import * as serviceWorker from './serviceWorker';
     pcracket.body.y = pc.body.y + 5
 
     racket.body.x = player.body.x - 16
-    racket.body.y = player.body.y - 9
+    racket.body.y = player.body.y - 16
 
 
     if (pchit === true) {
@@ -296,7 +296,7 @@ import * as serviceWorker from './serviceWorker';
     }
     else if (cursor.spacebar.isDown) {
       player.setFrame(161)
-      racket.setFrame(5)
+      racket.setFrame(161)
       if (setHitY < 60) {
         setHitY++
       }
